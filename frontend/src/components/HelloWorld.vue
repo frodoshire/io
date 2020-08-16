@@ -1,12 +1,27 @@
 <template>
-  <b-container fluid>
-    <div class="d-inline-flex p-2">
-      <b-form-input v-model="msg" placeholder="URL"></b-form-input>
-    </div>
-    <div class="d-inline-flex p-2">
-      <b-button block variant="primary" v-on:click="myfun">Short</b-button>
-    </div>
-    <p>{{ msg1 }}</p>
+  <b-container fluid="lg">
+    <b-row>
+      <b-col sm="6">
+        <b-form-input :type="url" v-model="msg" placeholder="URL"></b-form-input>
+      </b-col>
+      <b-col sm="2">
+        <b-button
+          type="submit"
+          block
+          variant="primary"
+          v-bind:disabled="msg === ''"
+          v-on:click="myfun"
+        >Short</b-button>
+      </b-col>
+    </b-row>
+    <b-row v-show="after">
+      <b-col sm="6">
+        <b-form-textarea plaintext :value="msg1"></b-form-textarea>
+      </b-col>
+      <b-col sm="2">
+        <b-button type="reset" block variant="primary" v-on:click="reinit">Copy</b-button>
+      </b-col>
+    </b-row>
   </b-container>
 </template>
 
@@ -16,10 +31,15 @@ export default {
   data() {
     return {
       msg: "",
-      msg1: ""
+      msg1: "",
+      after: false
     };
   },
   methods: {
+    reinit() {
+      this.after = false;
+      this.msg = "";
+    },
     myfun() {
       this.axios
         .post("http://localhost:8000/shortener", {
@@ -30,9 +50,10 @@ export default {
           response => (this.msg1 = window.location.pathname + response.data.url)
         )
         .catch(error => {
-          console.log(error);
           this.msg1 = error;
-        });
+          this.after = true;
+        })
+        .finally(() => (this.after = true));
     }
   }
 };
